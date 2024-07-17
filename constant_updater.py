@@ -20,7 +20,7 @@ def update_serp(entries, session):
         
         # Update the entry with the fetched SERP data and the current timestamp
         entry.serp_page = serp_data_raw
-        entry.time = datetime.now(timezone.utc)
+        entry.time = datetime.now(timezone.utc) + datetime.timedelta(hours=7)
         session.commit()
 
 
@@ -67,7 +67,7 @@ def has_24_hours_passed(time1, time2):
 def get_old_entries():
     notblank_objects = session.query(SerpData).filter(SerpData.serp_page != '').all()
     # Get the current time
-    current_time = datetime.now(timezone.utc)
+    current_time = datetime.now(timezone.utc) + datetime.timedelta(hours=7)
 
     obsolete_entries_queue = []
     for entry in notblank_objects:
