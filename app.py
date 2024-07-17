@@ -1,3 +1,13 @@
+# NOTE:
+# Đầu tiên chạy python db_init.py để tạo database
+# Sau đó chạy flask run --reload để chạy app chính
+# Mở một screen khác chạy python constant_updater.py để check domain mới và get kết quả mỗi phút 2 lần,
+# kết quả SERP sẽ được get lại mỗi 24h một lần
+# TODO:
+# - Cấu hình flask app và constant_updater thành service
+# - Log các thứ lại để phát hiện lỗi
+
+
 from flask import Flask, request, jsonify
 from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS
 from models import db, SerpData
@@ -55,3 +65,5 @@ def create_app():
 if __name__ == '__main__':
     app = create_app()
     app.run(debug=True)
+
+    
