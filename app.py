@@ -16,27 +16,31 @@ def create_app():
     @app.route('/queue', methods=['POST'])
     def queue():
         data = request.get_json()
-        domains = data['domainlist'].splitlines()
-        print(domains)
+        urls = data['urllist'].splitlines()
+        print(urls)
 
-        for domain in domains:
-            new_entry = SerpData(domain=domain, serp_page='', time=None)
-            db.session.add(new_entry)
+        urls_added_to_db = []
+        for url in urls:
+            serp_in_db = SerpData.query.filter_by(url=url).first()
+            if not serp_in_db:
+                new_entry = SerpData(url=url, serp_page='', time=None)
+                db.session.add(new_entry)
+                urls_added_to_db.append(url)
+            
+            db.session.commit()
         
-        db.session.commit()
-        
-        return jsonify({'status': 'success', 'message': f'{len(domains)} domains queued'}), 201
+        return jsonify({'status': 'success', 'message': f'{len(urls_added_to_db)} urls queued'}), 201
     
 
     @app.route('/check', methods=['GET'])
     def check():
-        domain = request.args.get('domain')
-        if not domain:
-            return jsonify({'status': 'error', 'message': 'Domain parameter is required'}), 400
+        url = request.args.get('url')
+        if not url:
+            return jsonify({'status': 'error', 'message': 'url parameter is required'}), 400
         
-        serp_data = SerpData.query.filter_by(domain=domain).first()
+        serp_data = SerpData.query.filter_by(url=url).first()
         if not serp_data:
-            return jsonify({'status': 'error', 'message': 'Domain not found'}), 404
+            return jsonify({'status': 'error', 'message': 'url not found'}), 404
         
         if serp_data.serp_page:
             return jsonify({'status': 'success', 'serp_page': serp_data.serp_page}), 200

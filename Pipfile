@@ -10,6 +10,7 @@ sqlalchemy = "*"
 pylint = "*"
 autopep8 = "*"
 flask-sqlalchemy = "*"
+ipython = "*"
 
 [dev-packages]
 
