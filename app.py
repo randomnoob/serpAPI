@@ -27,6 +27,7 @@ def create_app():
     def queue():
         data = request.get_json()
         urls = data['urllist'].splitlines()
+        urls = [x.strip() for x in urls]
         print(urls)
 
         urls_added_to_db = []
