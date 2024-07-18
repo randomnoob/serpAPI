@@ -48,18 +48,16 @@ def has_24_hours_passed(time1, time2):
 
 
 def get_hanoi_current_time():
-    return datetime.now(timezone.utc) + timedelta(hours=7)
+    # Define the GMT+7 timezone
+    gmt_plus_7 = timezone(timedelta(hours=7))
+    return datetime.now(timezone.utc).astimezone(gmt_plus_7)
 
 
 def convert_to_hanoi_time(utc_datetime):
     # Define the GMT+7 timezone offset
-    gmt7_offset = timedelta(hours=7)
-    
-    # Convert the UTC datetime to GMT+7 by adding the offset
-    gmt7_datetime = utc_datetime + gmt7_offset
-    
+    gmt_plus_7 = timezone(timedelta(hours=7))
     # Set the timezone information to GMT+7
-    gmt7_datetime = gmt7_datetime.replace(tzinfo=timezone(timedelta(hours=7)))
+    gmt7_datetime = utc_datetime.astimezone(gmt_plus_7)
     
     return gmt7_datetime
 

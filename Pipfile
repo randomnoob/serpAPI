@@ -11,6 +11,7 @@ pylint = "*"
 autopep8 = "*"
 flask-sqlalchemy = "*"
 ipython = "*"
+pytz = "*"
 
 [dev-packages]
 

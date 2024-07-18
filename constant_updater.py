@@ -56,7 +56,6 @@ def poll_and_update_serp():
 
 
 
-
 def get_old_entries():
     notblank_objects = session.query(SerpData).filter(SerpData.serp_page != '').all()
     # Get the current time
