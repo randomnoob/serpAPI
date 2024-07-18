@@ -60,7 +60,7 @@ def poll_and_update_serp():
 def get_old_entries():
     notblank_objects = session.query(SerpData).filter(SerpData.serp_page != '').all()
     # Get the current time
-    current_time = get_hanoi_current_time
+    current_time = get_hanoi_current_time()
 
     obsolete_entries_queue = []
     for entry in notblank_objects:
