@@ -5,7 +5,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import SerpData
 from get_serp import get_serp
+from get_serp_serper import get_serp_serper
 from config import SQLALCHEMY_DATABASE_URI
+from utils import has_24_hours_passed, get_hanoi_current_time\
+                , convert_to_hanoi_time, serper_check_top1_match
 
 engine = create_engine(SQLALCHEMY_DATABASE_URI)
 Session = sessionmaker(bind=engine)
@@ -15,12 +18,21 @@ def update_serp(entries, session):
     # Get SERP and update entries in the DB
     for entry in entries:
         url = entry.url
-        serp_data = get_serp(url)
+        # serp_data = get_serp(url)
+        serper_options = {
+            "location": "Vietnam",
+            "gl": "vn",
+            "hl": "vi"
+        }
+        serp_data = get_serp_serper(url)
+        
         serp_data_raw = json.dumps(serp_data)
         
         # Update the entry with the fetched SERP data and the current timestamp
         entry.serp_page = serp_data_raw
-        entry.time = datetime.now(timezone.utc) + datetime.timedelta(hours=7)
+        entry.time = get_hanoi_current_time()
+        entry.top1_match = serper_check_top1_match(serp_data, url)
+
         session.commit()
 
 
@@ -43,36 +55,17 @@ def poll_and_update_serp():
         print(f"Begin a new poll at {datetime.now(timezone.utc)}")
 
 
-def has_24_hours_passed(time1, time2):
-    """
-    Check if 24 hours have passed between two datetime objects.
-    
-    Parameters:
-    - time1 (datetime): The first datetime object.
-    - time2 (datetime): The second datetime object.
-    
-    Returns:
-    - bool: True if 24 hours have passed between the two datetime objects, False otherwise.
-    """
-    # Ensure both datetime objects are timezone-aware or timezone-naive
-    if time1.tzinfo != time2.tzinfo:
-        raise ValueError("Both datetime objects must have the same timezone information")
-    
-    # Calculate the time difference
-    time_difference = abs(time2 - time1)
-    
-    # Check if the time difference is 24 hours or more
-    return time_difference >= timedelta(hours=24)
+
 
 def get_old_entries():
     notblank_objects = session.query(SerpData).filter(SerpData.serp_page != '').all()
     # Get the current time
-    current_time = datetime.now(timezone.utc) + datetime.timedelta(hours=7)
+    current_time = get_hanoi_current_time
 
     obsolete_entries_queue = []
     for entry in notblank_objects:
         db_timestamp = entry.time
-        db_timestamp = db_timestamp.replace(tzinfo=timezone.utc)
+        db_timestamp = convert_to_hanoi_time(db_timestamp)
         # Check if 24 hours have passed
         has_passed = has_24_hours_passed(db_timestamp, current_time)
         if has_passed:

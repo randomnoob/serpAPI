@@ -11,29 +11,8 @@
 from flask import Flask, request, jsonify
 from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS
 from models import db, SerpData
+from utils import format_datetime_vietnamese
 
-# Vietnamese translations
-weekday_names_vi = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật"]
-month_names_vi = ["Tháng Một", "Tháng Hai", "Tháng Ba", "Tháng Tư", "Tháng Năm", "Tháng Sáu",
-                  "Tháng Bảy", "Tháng Tám", "Tháng Chín", "Tháng Mười", "Tháng Mười Một", "Tháng Mười Hai"]
-
-def format_datetime_vietnamese(utc_datetime):
-    # Get components of the datetime
-    year = utc_datetime.year
-    month = utc_datetime.month
-    day = utc_datetime.day
-    hour = utc_datetime.hour
-    minute = utc_datetime.minute
-    second = utc_datetime.second
-    
-    # Translate weekday and month names
-    weekday_vi = weekday_names_vi[utc_datetime.weekday()]
-    month_vi = month_names_vi[month - 1]  # Month names are 0-indexed in Python
-    
-    # Format datetime string in Vietnamese
-    vietnamese_datetime_str = f"{weekday_vi}, {day} {month_vi} {year} {hour}:{minute}:{second}"
-    
-    return vietnamese_datetime_str
 
 def create_app():
     app = Flask(__name__)
