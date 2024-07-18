@@ -3,6 +3,7 @@ import json
 from datetime import datetime, timezone, timedelta
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from contextlib import contextmanager
 from models import SerpData
 from get_serp import get_serp
 from get_serp_serper import get_serp_serper
@@ -14,8 +15,23 @@ engine = create_engine(SQLALCHEMY_DATABASE_URI)
 Session = sessionmaker(bind=engine)
 session = Session()
 
+def get_old_entries():
+    # Get entries from the DB, compare it to see if 24 hours has passed and refresh the SERP=> update to DB
+    notblank_objects = session.query(SerpData).filter(SerpData.serp_page != '').all()
+    current_time = get_hanoi_current_time()
+
+    obsolete_entries_queue = []
+    for entry in notblank_objects:
+        db_timestamp = entry.time
+        db_timestamp = convert_to_hanoi_time(db_timestamp)
+        # Check if 24 hours have passed
+        has_passed = has_24_hours_passed(db_timestamp, current_time)
+        if has_passed:
+            obsolete_entries_queue.append(entry)
+    return obsolete_entries_queue
+
 def update_serp(entries, session):
-    # Get SERP and update entries in the DB
+    # Get SERP and update entries data to the DB
     for entry in entries:
         url = entry.url
         # serp_data = get_serp(url)
@@ -35,42 +51,38 @@ def update_serp(entries, session):
 
         session.commit()
 
+def db_work():
+    # Query the database for entries with blank serp_page
+    entries = session.query(SerpData).filter(SerpData.serp_page == '').all()
+    old_entries = get_old_entries()
+    print(f"There is {len(entries)} blank and {len(old_entries)} old entries")
+    
+    # Get SERP for the new, blank entries
+    print("Get SERP for the new, blank entries")
+    update_serp(entries, session)
+    # Refresh SERP for old entries
+    print("Refresh SERP for old entries")
+    update_serp(old_entries, session)
+
+@contextmanager
+def session_scope():
+    """Provide a transactional scope around a series of operations."""
+    session = Session()
+    try:
+        yield session
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        raise
+    finally:
+        session.close()
 
 def poll_and_update_serp():
     while True:
-        # Query the database for entries with blank serp_page
-        entries = session.query(SerpData).filter(SerpData.serp_page == '').all()
-        old_entries = get_old_entries()
-        print(f"There is {len(entries)} blank and {len(old_entries)} old entries")
-        
-        # Get SERP for the new, blank entries
-        print("Get SERP for the new, blank entries")
-        update_serp(entries, session)
-        # Refresh SERP for old entries
-        print("Refresh SERP for old entries")
-        update_serp(old_entries, session)
-
+        with session_scope() as session:
+            db_work()
         # Sleep for a specified interval before polling again
         time.sleep(60)  # Poll every 60 seconds
-        print(f"Begin a new poll at {datetime.now(timezone.utc)}")
-
-
-
-def get_old_entries():
-    notblank_objects = session.query(SerpData).filter(SerpData.serp_page != '').all()
-    # Get the current time
-    current_time = get_hanoi_current_time()
-
-    obsolete_entries_queue = []
-    for entry in notblank_objects:
-        db_timestamp = entry.time
-        db_timestamp = convert_to_hanoi_time(db_timestamp)
-        # Check if 24 hours have passed
-        has_passed = has_24_hours_passed(db_timestamp, current_time)
-        if has_passed:
-            obsolete_entries_queue.append(entry)
-    return obsolete_entries_queue
-
 
 if __name__ == '__main__':
     poll_and_update_serp()
