@@ -48,21 +48,26 @@ def update_serp(entries, session):
         entry.serp_page = serp_data_raw
         entry.time = get_hanoi_current_time()
         entry.top1_match = serper_check_top1_match(serp_data, url)
-
         session.commit()
 
-def db_work():
-    # Query the database for entries with blank serp_page
-    entries = session.query(SerpData).filter(SerpData.serp_page == '').all()
-    old_entries = get_old_entries()
-    print(f"There is {len(entries)} blank and {len(old_entries)} old entries")
+def db_work(session, urls_to_update=None):
+    if urls_to_update:
+        entries = session.query(SerpData).filter(SerpData.url.in_(urls_to_update)).all()
+        print(f"Update SOME urls only: {urls_to_update}")
+    else:
+        # Query the database for entries with blank serp_page
+        entries = session.query(SerpData).filter(SerpData.serp_page == '').all()
+        print(f"Update ALL BLANK SERP")
+    # old_entries = get_old_entries()
+    print(f"There is {len(entries)} entries to be updated")
     
     # Get SERP for the new, blank entries
-    print("Get SERP for the new, blank entries")
+    print("Get SERP for the new entries START")
     update_serp(entries, session)
+    print("Get SERP for the new entries DONE")
     # Refresh SERP for old entries
-    print("Refresh SERP for old entries")
-    update_serp(old_entries, session)
+    # print("Refresh SERP for old entries")
+    # update_serp(old_entries, session)
 
 @contextmanager
 def session_scope():
@@ -80,7 +85,7 @@ def session_scope():
 def poll_and_update_serp():
     while True:
         with session_scope() as session:
-            db_work()
+            db_work(session)
         # Sleep for a specified interval before polling again
         time.sleep(60)  # Poll every 60 seconds
 

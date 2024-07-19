@@ -12,6 +12,7 @@ autopep8 = "*"
 flask-sqlalchemy = "*"
 ipython = "*"
 pytz = "*"
+gunicorn = "*"
 
 [dev-packages]
 
