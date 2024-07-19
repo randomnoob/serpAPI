@@ -62,7 +62,7 @@ def create_app():
             
             db.session.commit()
         
-        return jsonify({'status': 'success', 'message': f'{len(urls_added_to_db)} urls queued'}), 201
+        return jsonify({'status': 'success', 'message': f'{len(urls_added_to_db)} urls đã được thêm vào hệ thống'}), 201
     
 
     @app.route('/check', methods=['POST'])

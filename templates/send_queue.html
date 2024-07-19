@@ -35,6 +35,7 @@
                 document.getElementById("result").innerText = data.message;
             })
             .catch(error => console.error("Error:", error))
+            .then(delay(1000))
             .then(forceUpdate());
         }
 
