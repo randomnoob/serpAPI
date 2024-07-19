@@ -3,7 +3,7 @@ import json
 import itertools
 from config import SERPER_API_KEY
 
-api_keys = [SERPER_API_KEY, "f2262d553f5691749a5420e2a5d3a2b36c84aa62",
+api_keys = [SERPER_API_KEY,
             "dd89053d2e8cc63b76bef11f70a31f2d09b50252"]
 api_key_cycle = itertools.cycle(api_keys)
 
