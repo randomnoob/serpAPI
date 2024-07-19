@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation Input</title>
+</head>
+<body>
+    <h1>Xóa một số keyword</h1>
+        <textarea id="delete_some" rows="10" cols="30"></textarea><br>
+        <button id="delete-button">Xóa một số keyword</button>
+        <p id="result" style="font-size: larger;"></p>
+
+    <script>
+        document.getElementById('delete-button').addEventListener('click', function() {
+            const userInput = window.prompt('Hãy điền "OK" để tiếp tục');
+            if (userInput === 'OK') {
+                alert('OK, đã thực hiện lệnh.');
+                // Call the function or perform the action here
+                deleteSome();
+            } else {
+                alert('Lệnh bị hủy vì bạn ko "OK" :v');
+            }
+        });
+
+        function deleteSome() {
+            const inputText = document.getElementById("delete_some").value;
+            fetch("/delete-api-call", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ urllist: inputText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("result").innerText = data.message;
+            })
+            .catch(error => console.error("Error:", error))
+            }
+    </script>
+</body>
+</html>

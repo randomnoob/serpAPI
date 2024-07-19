@@ -40,7 +40,7 @@ def update_serp(entries, session):
             "gl": "vn",
             "hl": "vi"
         }
-        serp_data = get_serp_serper(url)
+        serp_data = get_serp_serper(url, **serper_options)
         
         serp_data_raw = json.dumps(serp_data)
         
@@ -68,6 +68,15 @@ def db_work(session, urls_to_update=None):
     # Refresh SERP for old entries
     # print("Refresh SERP for old entries")
     # update_serp(old_entries, session)
+
+def delete_some(session, urls_to_delete):
+    entries = session.query(SerpData).filter(SerpData.url.in_(urls_to_delete)).all()
+    for entry in entries:
+        print(f"Delete {entry.url}")
+        session.delete(entry)   
+    session.commit()
+
+
 
 @contextmanager
 def session_scope():

@@ -12,7 +12,7 @@ from flask import Flask, request, jsonify, render_template, Response
 from config import SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS
 from models import db, SerpData
 from utils import format_datetime_vietnamese
-from constant_updater import db_work as force_update_serp, session_scope
+from constant_updater import db_work as force_update_serp, session_scope, delete_some
 import csv, io, json
 
 
@@ -31,6 +31,21 @@ def create_app():
     def send_queue():
         return render_template('send_queue.html')
     
+    @app.route('/delete-some')
+    def delete_page():
+        return render_template('delete.html')
+    @app.route('/delete-api-call', methods=['POST'])
+    def delete_api_call():
+        data = request.get_json()
+        urls_to_delete = data['urllist'].splitlines()
+        try:
+            with session_scope() as session:
+                delete_some(session, urls_to_delete=urls_to_delete)
+                return jsonify({'status': 'success', 'message': f'{len(urls_to_delete)} urls đã được xóa'}), 201
+        except Exception as e:
+            return jsonify({'status': 'error', 'message': e}), 201
+
+        
     @app.route('/force-update-all', methods=['PUT'])
     def force_update_all():
         with session_scope() as session:
