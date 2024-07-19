@@ -21,6 +21,18 @@
     <button onclick="forceUpdate()">CẬP NHẬT TẤT CẢ KEYWORD TỪ TRƯỚC ĐẾN GIỜ</button>
 
     <script>
+        // Delay function that returns a promise that resolves after the specified delay
+        function delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+        };
+        
+        function forceUpdate() {
+            fetch("/force-update-all", {
+                method: "PUT",
+            });
+        };
+
+
         function sendData() {
             const inputText = document.getElementById("input_text").value;
             fetch("/queue", {
@@ -37,7 +49,7 @@
             .catch(error => console.error("Error:", error))
             .then(() => delay(1000))
             .then(() => forceUpdate());
-        }
+        };
 
         function forceUpdateSome() {
             const inputText = document.getElementById("force_update_some").value;
@@ -48,19 +60,8 @@
                 },
                 body: JSON.stringify({ urllist: inputText })
             })
-        }
+        };
 
-
-        // Delay function that returns a promise that resolves after the specified delay
-        function delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-        }
-        
-        function forceUpdate() {
-            fetch("/force-update-all", {
-                method: "PUT",
-            });
-        }
     </script>
 </body>
 </html>
