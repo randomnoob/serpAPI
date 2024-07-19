@@ -50,7 +50,7 @@ def create_app():
     def queue():
         data = request.get_json()
         urls = data['urllist'].splitlines()
-        urls = [x.strip() for x in urls]
+        urls = [x.strip() for x in urls if x]
 
         urls_added_to_db = []
         for url in urls:
@@ -95,8 +95,11 @@ def create_app():
         writer.writerow(['id', 'url', 'top1_url', 'time', 'top1_match'])
         # Write the data
         for data in serp_data:
-            serp_page = json.loads(data.serp_page)
-            top1_url = serp_page['organic'][0]['link']
+            try:
+                serp_page = json.loads(data.serp_page)
+                top1_url = serp_page['organic'][0]['link']
+            except Exception as e:
+                top1_url = e
             writer.writerow([data.id, data.url, top1_url, data.time, data.top1_match])
 
         # Seek to the start of the stream
