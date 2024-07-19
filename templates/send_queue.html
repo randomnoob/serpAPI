@@ -35,7 +35,7 @@
                 document.getElementById("result").innerText = data.message;
             })
             .catch(error => console.error("Error:", error))
-            .then(delay(1000))
+            .then(() => delay(1000))
             .then(forceUpdate());
         }
 
@@ -50,6 +50,11 @@
             })
         }
 
+
+        // Delay function that returns a promise that resolves after the specified delay
+        function delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+        }
         
         function forceUpdate() {
             fetch("/force-update-all", {
