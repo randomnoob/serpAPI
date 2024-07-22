@@ -50,10 +50,12 @@ def update_serp(entries, session):
         entry.top1_match = serper_check_top1_match(serp_data, url)
         session.commit()
 
-def db_work(session, urls_to_update=None):
+def db_work(session, urls_to_update=None, force_all=False):
     if urls_to_update:
         entries = session.query(SerpData).filter(SerpData.url.in_(urls_to_update)).all()
         print(f"Update SOME urls only: {urls_to_update}")
+    elif force_all:
+        entries = session.query(SerpData).all()
     else:
         # Query the database for entries with blank serp_page
         entries = session.query(SerpData).filter(SerpData.serp_page == '').all()

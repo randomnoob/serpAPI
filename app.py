@@ -49,7 +49,7 @@ def create_app():
     @app.route('/force-update-all', methods=['PUT'])
     def force_update_all():
         with session_scope() as session:
-            force_update_serp(session)
+            force_update_serp(session, force_all=True)
             return ''
 
 
