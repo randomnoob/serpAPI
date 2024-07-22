@@ -113,6 +113,8 @@ def create_app():
             try:
                 serp_page = json.loads(data.serp_page)
                 top1_url = serp_page['organic'][0]['link']
+            except IndexError:
+                top1_url = "SERP 0 kết quả"
             except Exception as e:
                 top1_url = e
             writer.writerow([data.id, data.url, top1_url, data.time, data.top1_match])
